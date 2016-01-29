@@ -8,7 +8,7 @@
 # String (binary) concatentation:   "str1" <> "str2"
 
 prefix = fn pref ->
-
+  fn next -> pref <> " " <> next end
 end
 
 mrs = prefix.("Mrs")

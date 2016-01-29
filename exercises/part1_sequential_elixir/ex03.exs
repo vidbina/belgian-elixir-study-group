@@ -23,6 +23,12 @@ defmodule Parentheses do
     count(characters) == 0
   end
 
+  def count(s), do: count(s, 0)
+  def count(["(" | rest], acc), do: count(rest, acc+1)
+  def count([")" | rest], acc), do: count(rest, acc-1)
+  def count([_ | rest], acc), do: count(rest, acc)
+  def count([], acc), do: acc
+
 
 end
 

@@ -6,7 +6,8 @@
 
 
 defmodule Sum do
-
+  def sum(0), do: 0
+  def sum(x), do: x + sum(x-1)
 end
 
 

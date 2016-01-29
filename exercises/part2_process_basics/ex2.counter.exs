@@ -21,6 +21,18 @@ defmodule Counter do
     send counter, {self, :inc}
   end
 
+  def dec(counter) do
+    send counter, {self, :dec}
+  end
+
+  def terminate(counter) do
+    send counter, {self, :die}
+    receive do
+      :ok ->
+        :done
+      after 1000 -> IO.puts("timeout")
+    end
+  end
 
   @doc "Returns the current value of the given counter"
   def value(counter) do
@@ -37,8 +49,15 @@ defmodule Counter do
 
   defp loop(counter) do
     receive do
+      {sender, :die} ->
+        send sender, :ok
+        # NOTE: Any simple command here my keep that race condition in tact,
+        # because the assertion could be evaluated while we're still processing
+        # an IO.puts here :P. Be mindful of that.
       {_, :inc} ->
         loop(counter + 1)
+      {_, :dec} ->
+        loop(counter - 1)
       {sender, :val} ->
         send sender, {self, :ok, counter}
         loop(counter)
@@ -81,22 +100,26 @@ defmodule CounterTest do
     assert 0 == Counter.value(pid3)
   end
 
-  # test "decrementing counter" do
-  #   c = Counter.start
-  #   Counter.inc(c)
-  #   Counter.dec(c)
-  #   Counter.inc(c)
-  #   assert 1 == Counter.value(c)
-  # end
+  test "decrementing counter" do
+    c = Counter.start
+    Counter.inc(c)
+    Counter.dec(c)
+    Counter.inc(c)
+    assert 1 == Counter.value(c)
+  end
 
-  # test "terminate counter" do
-  #   pid = Counter.start
-  #   Counter.inc(pid)
+  test "terminate counter" do
+    pid = Counter.start
+    Counter.inc(pid)
 
-  #   Counter.terminate(pid)
-  #   Counter.terminate(pid)
+    Counter.terminate(pid)
+    #Counter.terminate(pid)
 
-  #   assert ! Process.alive?(pid)
-  # end
+    # NOTE: the IO inspect delays the assertion and if we're luck the process
+    # will actually be down. It's a race issue. It needs to be synchronized
+    # in order to have some guarantee that this message is processed.
+    #IO.inspect Process.alive?(pid)
+    assert ! Process.alive?(pid)
+  end
 
 end

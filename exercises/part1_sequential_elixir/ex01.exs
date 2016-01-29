@@ -8,7 +8,10 @@ defmodule FB do
   # If the second is zero return “Buzz”.
   # Otherwise return the third argument.
   # Use pattern matching, look up the cheatsheet
-  def fizz_buzz_base(0, 0, _), do:
+  def fizz_buzz_base(0, 0, _), do: "FizzBuzz"
+  def fizz_buzz_base(0, _, _), do: "Fizz"
+  def fizz_buzz_base(_, 0, _), do: "Buzz"
+  def fizz_buzz_base(_, _, x), do: x
 
 
   # The operator rem(a, b) returns the remainder after dividing a by b.
